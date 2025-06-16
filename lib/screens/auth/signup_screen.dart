@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../services/api_helper.dart';
+
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -17,6 +19,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _mobileNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final baseUrl = ApiHelper.getBaseUrl();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -29,7 +32,7 @@ class _SignupScreenState extends State<SignupScreen> {
       _errorMessage = null;
     });
 
-    final url = Uri.parse('http://localhost:8080/api/auth/signup'); // Update if using IP/device
+    final url = Uri.parse('$baseUrl/auth/signup'); // Update if using IP/device
     final body = jsonEncode({
       'name': _nameController.text,
       'username': _usernameController.text,

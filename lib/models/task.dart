@@ -6,6 +6,8 @@ class Task {
   final DateTime dueDate;
   final DateTime? reminderDate;
   final String? priority;
+  final String? category;
+  final List<String> tags;
 
   Task({
     required this.id,
@@ -15,6 +17,8 @@ class Task {
     required this.dueDate,
     required this.reminderDate,
     required this.priority,
+    this.category,
+    required this.tags,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -28,6 +32,8 @@ class Task {
           ? DateTime.parse(json['reminderTime'])
           : null,
       priority: json['priority'] as String?,
+      category: json['category'],
+      tags: List<String>.from(json['tags'] ?? []),
     );
   }
 }

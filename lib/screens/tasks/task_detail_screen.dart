@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../models/task.dart';
+import '../../services/api_helper.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Task task;
@@ -22,6 +23,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   String message = '';
   String selectedPriority = 'MEDIUM';
   String selectedStatus = 'PENDING';
+  final baseUrl = ApiHelper.getBaseUrl();
 
   @override
   void initState() {
@@ -39,8 +41,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt');
 
+
     final response = await http.put(
-      Uri.parse('http://localhost:8080/api/tasks/${widget.task.id}'),
+      Uri.parse('$baseUrl/tasks/${widget.task.id}'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -70,7 +73,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final token = prefs.getString('jwt');
 
     final response = await http.delete(
-      Uri.parse('http://localhost:8080/api/tasks/${widget.task.id}'),
+      Uri.parse('$baseUrl/tasks/${widget.task.id}'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
@@ -132,13 +135,17 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               onChanged: (val) => setState(() => selectedPriority = val!),
               decoration: const InputDecoration(labelText: 'Priority'),
             ),
-            DropdownButtonFormField(
+            DropdownButtonFormField<String>(
               value: selectedStatus,
-              items: ['PENDING', 'IN_PROGRESS', 'COMPLETED'].map((val) {
-                return DropdownMenuItem(value: val, child: Text(val));
-              }).toList(),
-              onChanged: (val) => setState(() => selectedStatus = val!),
               decoration: const InputDecoration(labelText: 'Status'),
+              items: const [
+                DropdownMenuItem(value: 'PENDING', child: Text('Pending')), // ✅ Add this
+                DropdownMenuItem(value: 'IN_PROGRESS', child: Text('In Progress')),
+                DropdownMenuItem(value: 'COMPLETED', child: Text('Completed')),
+              ],
+              onChanged: (value) {
+                setState(() => selectedStatus = value!);
+              },
             ),
             const SizedBox(height: 16),
             if (message.isNotEmpty) Text(message, style: const TextStyle(color: Colors.red)),
