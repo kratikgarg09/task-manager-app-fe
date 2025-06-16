@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../services/api_helper.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -21,8 +23,11 @@ class _LoginScreenState extends State<LoginScreen> {
       loading = true;
     });
 
+
+    final baseUrl = ApiHelper.getBaseUrl();
+    print('baseUrl : $baseUrl');
     final response = await http.post(
-      Uri.parse('http://localhost:8080/api/auth/login'), // change if using emulator or deploy
+      Uri.parse('$baseUrl/auth/login'), // change if using emulator or deploy
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'username': emailController.text,
@@ -35,6 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (response.statusCode == 200) {
+      setState(() => error = 'Login successfully');
       final data = jsonDecode(response.body);
       final token = data['token'];
 

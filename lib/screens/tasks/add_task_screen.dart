@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../services/api_helper.dart';
+
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({super.key});
 
@@ -14,6 +16,7 @@ class AddTaskScreen extends StatefulWidget {
 class _AddTaskScreenState extends State<AddTaskScreen> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
+  final baseUrl = ApiHelper.getBaseUrl();
 
   DateTime? dueDate;
   DateTime? reminderDate;
@@ -38,19 +41,22 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt');
 
+
     final catRes = await http.get(
-      Uri.parse('http://localhost:8080/api/categories'),
+      Uri.parse('$baseUrl/category/get-all-categories'),
       headers: {'Authorization': 'Bearer $token'},
     );
     final tagRes = await http.get(
-      Uri.parse('http://localhost:8080/api/tags'),
+      Uri.parse('$baseUrl/tags/get-all-tags'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
     if (catRes.statusCode == 200 && tagRes.statusCode == 200) {
       setState(() {
         categories = jsonDecode(catRes.body);
+        print('Categories: $categories');
         tags = jsonDecode(tagRes.body);
+        print('Tags: $tags');
       });
     }
   }
@@ -66,10 +72,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       return;
     }
 
-    // if ( selectedCategory == null){
-    //   setState(() => message = 'Category is required');
-    //   return;
-    // }
+    if ( selectedCategory == null){
+      setState(() => message = 'Category is required');
+      return;
+    }
 
 
 
@@ -82,7 +88,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     final token = prefs.getString('jwt');
 
     final response = await http.post(
-      Uri.parse('http://localhost:8080/api/tasks/create'),
+      Uri.parse('$baseUrl/tasks/create'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -102,6 +108,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     setState(() => loading = false);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
+      setState(() => message = 'Task added successfully');
       Navigator.pop(context, true);
     } else {
       setState(() => message = 'Failed to add task');
@@ -163,13 +170,17 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               decoration: const InputDecoration(labelText: 'Priority'),
             ),
 
-            DropdownButtonFormField(
+            DropdownButtonFormField<String>(
               value: selectedStatus,
-              items: ['PENDING', 'IN_PROGRESS', 'COMPLETED'].map((val) {
-                return DropdownMenuItem(value: val, child: Text(val));
-              }).toList(),
-              onChanged: (val) => setState(() => selectedStatus = val!),
               decoration: const InputDecoration(labelText: 'Status'),
+              items: const [
+                DropdownMenuItem(value: 'PENDING', child: Text('Pending')), // ✅ Add this
+                DropdownMenuItem(value: 'IN_PROGRESS', child: Text('In Progress')),
+                DropdownMenuItem(value: 'COMPLETED', child: Text('Completed')),
+              ],
+              onChanged: (value) {
+                setState(() => selectedStatus = value!);
+              },
             ),
 
             DropdownButtonFormField(
@@ -205,6 +216,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 );
               }).toList(),
             ),
+
 
             const SizedBox(height: 16),
             if (message.isNotEmpty) Text(message, style: const TextStyle(color: Colors.red)),
