@@ -8,6 +8,7 @@ import '../../services/api_helper.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Task task;
+
   const TaskDetailScreen({super.key, required this.task});
 
   @override
@@ -41,13 +42,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt');
 
-
     final response = await http.put(
       Uri.parse('$baseUrl/tasks/${widget.task.id}'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
+      headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
       body: jsonEncode({
         'title': titleController.text,
         'description': descriptionController.text,
@@ -85,19 +82,24 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   Future<void> _pickDate(bool isReminder) async {
+    final now = DateTime.now();
+    final initial = isReminder ? (reminderDate ?? now) : dueDate;
+
     final date = await showDatePicker(
       context: context,
-      initialDate: dueDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDate: initial,
+      firstDate: DateTime(2000),
+      lastDate: now.add(const Duration(days: 365)),
     );
 
     if (date != null) {
-      if (isReminder) {
-        setState(() => reminderDate = date);
-      } else {
-        setState(() => dueDate = date);
-      }
+      setState(() {
+        if (isReminder) {
+          reminderDate = date;
+        } else {
+          dueDate = date;
+        }
+      });
     }
   }
 
@@ -111,8 +113,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Title')),
-            TextField(controller: descriptionController, decoration: const InputDecoration(labelText: 'Description')),
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
             const SizedBox(height: 16),
             ListTile(
               title: Text('Due Date: ${dateFormat.format(dueDate)}'),
@@ -120,18 +128,21 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               onTap: () => _pickDate(false),
             ),
             ListTile(
-              title: Text(reminderDate == null
-                  ? 'Set Reminder Date'
-                  : 'Reminder Date: ${dateFormat.format(reminderDate!)}'),
+              title: Text(
+                reminderDate == null
+                    ? 'Set Reminder Date'
+                    : 'Reminder Date: ${dateFormat.format(reminderDate!)}',
+              ),
               trailing: const Icon(Icons.alarm),
               onTap: () => _pickDate(true),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField(
               value: selectedPriority,
-              items: ['LOW', 'MEDIUM', 'HIGH'].map((val) {
-                return DropdownMenuItem(value: val, child: Text(val));
-              }).toList(),
+              items:
+                  ['LOW', 'MEDIUM', 'HIGH'].map((val) {
+                    return DropdownMenuItem(value: val, child: Text(val));
+                  }).toList(),
               onChanged: (val) => setState(() => selectedPriority = val!),
               decoration: const InputDecoration(labelText: 'Priority'),
             ),
@@ -149,7 +160,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             ),
             const SizedBox(height: 16),
             if (message.isNotEmpty) Text(message, style: const TextStyle(color: Colors.red)),
-            ElevatedButton(onPressed: loading ? null : _updateTask, child: const Text('Update Task')),
+            ElevatedButton(
+              onPressed: loading ? null : _updateTask,
+              child: const Text('Update Task'),
+            ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: loading ? null : _deleteTask,

@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignupScreen(),
         '/dashboard': (context) => const HomeScreen(),
         '/add-task': (context) => const AddTaskScreen(),
+
       },
     );
   }
