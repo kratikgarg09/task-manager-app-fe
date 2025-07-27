@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:task_manager_app_fe/screens/tasks/task_filter_screen.dart';
 import '../../services/task_service.dart';
 import '../../models/task.dart';
+import '../auth/profile_screen.dart';
+import '../dashboard/calendar_screen.dart';
+import '../dashboard/dashboard_screen.dart';
 import '../tasks/task_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -60,35 +64,71 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    DropdownButton<String>(
-                      value: selectedStatus,
-                      items: const [
-                        DropdownMenuItem(value: 'ALL', child: Text('All Status')),
-                        DropdownMenuItem(value: 'PENDING', child: Text('Pending')),
-                        DropdownMenuItem(value: 'IN_PROGRESS', child: Text('In Progress')),
-                        DropdownMenuItem(value: 'COMPLETED', child: Text('Completed')),
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                          ),
+                          child: const Text("Dashboard"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const TaskFilterScreen()),
+                          ),
+                          child: const Text("Search Filter"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                          ),
+                          child: const Text("Profile"),
+                        ),
+                        DropdownButton<String>(
+                          value: selectedStatus,
+                          items: const [
+                            DropdownMenuItem(value: 'ALL', child: Text('All Status')),
+                            DropdownMenuItem(value: 'PENDING', child: Text('Pending')),
+                            DropdownMenuItem(value: 'IN_PROGRESS', child: Text('In Progress')),
+                            DropdownMenuItem(value: 'COMPLETED', child: Text('Completed')),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              selectedStatus = value!;
+                            });
+                          },
+                        ),
+                        const SizedBox(width: 16),
+                        DropdownButton<String>(
+                          value: selectedDue,
+                          items: const [
+                            DropdownMenuItem(value: 'ALL', child: Text('All Dates')),
+                            DropdownMenuItem(value: 'TODAY', child: Text('Due Today')),
+                            DropdownMenuItem(value: 'UPCOMING', child: Text('Upcoming')),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              selectedDue = value!;
+                            });
+                          },
+                        ),
                       ],
-                      onChanged: (value) {
-                        setState(() {
-                          selectedStatus = value!;
-                        });
-                      },
                     ),
-                    const SizedBox(width: 16),
-                    DropdownButton<String>(
-                      value: selectedDue,
-                      items: const [
-                        DropdownMenuItem(value: 'ALL', child: Text('All Dates')),
-                        DropdownMenuItem(value: 'TODAY', child: Text('Due Today')),
-                        DropdownMenuItem(value: 'UPCOMING', child: Text('Upcoming')),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          selectedDue = value!;
-                        });
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CalendarScreen()),
+                        );
                       },
+                      child: const Text("Calendar View"),
                     ),
                   ],
                 ),
